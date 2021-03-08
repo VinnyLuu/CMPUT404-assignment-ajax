@@ -22,10 +22,12 @@
 
 
 import flask
-from flask import Flask, request
+from flask import Flask, request, redirect
+from flask_cors import CORS
 import json
 app = Flask(__name__)
 app.debug = True
+CORS(app)
 
 # An example world
 # {
@@ -74,22 +76,19 @@ def flask_post_json():
 @app.route("/")
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    f = open("static/index.html")
-    return f.read()
+    return redirect("/static/index.html", code=302)
 
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
     data = flask_post_json()
-    for key in data:
-        value = data[key]
-        myWorld.update(entity, key, value)
-    return json.dumps(myWorld.get(entity))
+    myWorld.set( entity, data )
+    return flask.jsonify(myWorld.get(entity))
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
-    return json.dumps(myWorld.world())
+    return flask.jsonify(myWorld.world())
 
 @app.route("/entity/<entity>")    
 def get_entity(entity):
