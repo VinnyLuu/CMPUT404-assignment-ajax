@@ -270,12 +270,8 @@ function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
     var url = host + "/world";
     sendJSONXMLHTTPRequest(url, null, (w)=>{ 
-        for (var key in w) {
-            if (!(key in world) || world[key] != w[key]) {
-                drawNextFrame();
-                world[key] = w[key];
-            }
-        }
+        world = w;
+        drawNextFrame();
     });
     drawFrame();
 }
