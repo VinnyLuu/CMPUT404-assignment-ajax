@@ -24,6 +24,7 @@
   </head> 
   <body bgcolor="black" height="100%" width="100%"> 
     <div>
+        <!-- Color selector: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/color -->
         <label for="selectedColor" style="color: white;">Select color:</label>
         <input type="color" id="selectedColor" name="selectedColor" value="#ff0000"><br>
         <label for="size" style="color: white;">Select radius:</label>
@@ -92,6 +93,7 @@ function drawCircle(context,entity) {
         fillStyle = entity["colour"];
         strokeStyle = fillStyle;
         arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        // fill the circle
         fill();                                
     }
 }
@@ -165,13 +167,14 @@ function addEntity(entity, data) {
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
     var url = host + "/entity/" + entity
+    // send request, no need to do anything with response
     sendJSONXMLHTTPRequest(url, data, (object) => {})
 }
 
 var counter = 0;
 function addEntityWithoutName(data) {
     //var name = "X"+Math.floor((Math.random()*100)+1);
-    var name = "X"+(counter++)%1000;
+    var name = "X"+(counter++)%10000;
     addEntity(name,data);
 }
 
@@ -273,6 +276,7 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
+// Insert color and radius that is currently selected
 mouse.mousedowners.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':color, 'radius':size});
 });
@@ -292,11 +296,21 @@ function update() {
     sendJSONXMLHTTPRequest(url, null, (w)=>{ 
         world = w;
         drawNextFrame();
+        // get the latest entity name so that it doesnt overwrite current users drawing
+        let entityNames = Object.keys(w);
+        for (let name of entityNames) {
+            // slice X off entity name to extract number
+            var number = parseInt(name.slice(1));
+            if (number > counter) {
+                counter = number;
+            }
+        }
     });
     drawFrame();
 }
 
 function clear() {
+    // send request to clear endpoint to clear the world
     var url = host + "/clear";
     sendJSONXMLHTTPRequest(url, null, (w)=>{ 
         world = w;
